@@ -1,7 +1,7 @@
 <template>
   <el-row>
     <el-col :span="12" style="line-height: 60px">
-      <img src="../../assets/logo.png" style="float: left;display: inline-block;height: 30px;margin: 15px 10px 15px 0">
+      <img src="../../../static/logo.png" style="float: left;display: inline-block;height: 30px;margin: 15px 10px 15px 0">
       <p style="display: inline-block;line-height: 30px;height: 30px;float: left;font-size: 16px">
         {{ title }}
       </p>

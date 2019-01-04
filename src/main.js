@@ -115,11 +115,15 @@ function isNull (obj) {
 
 Axios.interceptors.request.use(
   config => {
-    store.dispatch('loading')
+    const token = sessionStorage.token
+    if (token) {
+      config.headers['Authorization'] = sessionStorage.token
+    } else {
+      // router.push('/login')
+    }
     return config
   },
   err => {
-    store.dispatch('noLoading')
     return Promise.reject(err)
   })
 

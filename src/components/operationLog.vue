@@ -133,7 +133,7 @@ export default {
     },
     request (formInline) {
       let _this = this
-      this.$http.get('/api/base/operation/log', {
+      this.$http.get('/api/record/operation/log', {
         params: JSON.parse(JSON.stringify(formInline))})
         .then(function (response) {
           if (response.data.code !== null && response.data.code !== undefined) {

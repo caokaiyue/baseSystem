@@ -120,21 +120,23 @@ export default {
             .then(function (response) {
               _this.isLogin = false
               if (response.data.code === 0) {
-                sessionStorage.setItem('userName', response.data.data.userName)
-                sessionStorage.setItem('firstLoginTag', response.data.data.firstLoginTag)
-                sessionStorage.setItem('roleName', response.data.data.roleName)
-                sessionStorage.setItem('menuList', JSON.stringify(response.data.data.menuList))
-                response.data.data.firstLoginTag === 0 ? sessionStorage.setItem('changePwdFormVisible', 'true') : sessionStorage.setItem('changePwdFormVisible', 'false')
-                if (sessionStorage.getItem('roleName') === 'ROLE_sysadmin') {
-                  _this.$router.push('/home/user')
-                } else if (sessionStorage.getItem('roleName') === 'ROLE_bumaster') {
-                  _this.$router.push('/home/operationInfo')
-                } else if (sessionStorage.getItem('roleName') === 'ROLE_burisker') {
-                  _this.$router.push('/home/workspace')
-                }
+                sessionStorage.setItem('token', response.data.data.token)
+                // sessionStorage.setItem('userName', response.data.data.userName)
+                // sessionStorage.setItem('firstLoginTag', response.data.data.firstLoginTag)
+                // sessionStorage.setItem('roleName', response.data.data.roleName)
+                // sessionStorage.setItem('menuList', JSON.stringify(response.data.data.menuList))
+                // response.data.data.firstLoginTag === 0 ? sessionStorage.setItem('changePwdFormVisible', 'true') : sessionStorage.setItem('changePwdFormVisible', 'false')
+                // if (sessionStorage.getItem('roleName') === 'ROLE_sysadmin') {
+                //   _this.$router.push('/home/user')
+                // } else if (sessionStorage.getItem('roleName') === 'ROLE_bumaster') {
+                //   _this.$router.push('/home/operationInfo')
+                // } else if (sessionStorage.getItem('roleName') === 'ROLE_burisker') {
+                //   _this.$router.push('/home/workspace')
+                // }
+                _this.$router.push('/home/menu')
               } else if (response.data.code === 500) {
                 _this.$message({
-                  message: '验证码已失效',
+                  message: response.data.msg,
                   type: response.data.code === 0 ? 'success' : 'error',
                   duration: 2000
                 })
@@ -145,6 +147,7 @@ export default {
                   type: response.data.code === 0 ? 'success' : 'error',
                   duration: 2000
                 })
+                _this.getRandomCode()
               }
             })
             .catch(function () {

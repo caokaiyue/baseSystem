@@ -111,7 +111,7 @@ export default {
     },
     request (formInline) {
       let _this = this
-      this.$http.get('/api/base/exception/log', {
+      this.$http.get('/api/record/exception/log', {
         params: JSON.parse(JSON.stringify(formInline))})
         .then(function (response) {
           if (response.data.code !== null && response.data.code !== undefined) {
