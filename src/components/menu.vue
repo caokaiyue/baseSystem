@@ -4,12 +4,15 @@
     <el-form :inline="true" :model="formInline" label-position="left">
       <el-form-item>
         <el-button type="primary" @click="search">查询</el-button>
+        <el-button type="primary" @click="showEdit">新增</el-button>
       </el-form-item>
       <div style="width: 100%">
         <el-table
           :data="tableData"
           fit
           stripe
+          border
+          :cell-style="{padding: '0'}"
           :highlight-current-row="true"
           style="width: 100%">
           <el-table-column
@@ -18,10 +21,10 @@
             <template slot-scope="scope">
               <div v-if="scope.row.children.length>0" :style="{ paddingLeft: scope.row.textIndent + 'px' }">
                 <div style="display: inline-block" v-if="scope.row.expand" @click="expandHandler(scope.row, false)">
-                  <span class="iconfont icon-caret-right"></span>
+                  <span class="iconfont icon-caret-down"></span>
                 </div>
                 <div style="display: inline-block" v-else @click="expandHandler(scope.row, true)">
-                  <span class="iconfont icon-caret-down"></span>
+                  <span class="iconfont icon-caret-right"></span>
                 </div>
                 <p style="display: inline-block">{{scope.row.name}}</p>
               </div>
@@ -43,6 +46,13 @@
           <el-table-column
             prop="textIndent"
             label="textIndent"
+            v-if="false"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="menuId"
+            label="menuId"
+            v-if="false"
           >
           </el-table-column>
           <el-table-column
@@ -77,7 +87,7 @@
             >
           </el-table-column>
           <el-table-column
-            prop="sort"
+            prop="orderNum"
             label="排序"
             >
           </el-table-column>
@@ -97,7 +107,7 @@
           <el-table-column label="操作" min-width="50">
             <template slot-scope="scope">
               <el-button type="text" size="small" @click="showEdit(scope.row)">修改</el-button>
-              <el-button type="text" size="small" @click="showCurrentMessage(scope.row.id)">删除</el-button>
+              <!--<el-button type="text" size="small" @click="showCurrentMessage(scope.row.menuId)">删除</el-button>-->
             </template>
           </el-table-column>
         </el-table>
@@ -112,34 +122,44 @@
         :model="editMenuFormInline"
         :rules="editMenuRules"
         label-width="120px">
-        <el-form-item label="状态">
-          <el-radio-group v-model="editMenuFormInline.status">
-            <el-radio :label="3">停用</el-radio>
-            <el-radio :label="6">正常</el-radio>
+        <el-form-item label="类型">
+          <el-radio-group v-model="editMenuFormInline.type" :disabled="radioDisabled">
+            <el-radio :label="1">菜单</el-radio>
+            <el-radio :label="2">按钮</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="名称" required="true">
+        <el-form-item label="名称" prop="name">
           <el-input v-model="editMenuFormInline.name" placeholder="名称"></el-input>
         </el-form-item>
-        <el-form-item label="上级菜单" required="true">
-          <el-input v-model="editMenuFormInline.pid" placeholder="上级菜单"></el-input>
+        <el-form-item label="上级菜单" prop="parentName">
+          <el-popover
+            placement="bottom-start"
+            :ref="'parentNamePopover'"
+            trigger="click">
+            <div slot="reference">
+              <el-input v-model="editMenuFormInline.parentName" readonly placeholder="上级菜单">
+                <i slot="suffix" style="cursor: pointer" @click="clearHandler" class="el-input__icon el-icon-circle-close"></i>
+              </el-input>
+            </div>
+            <el-tree :data="tableDataProtoType" :expand-on-click-node="false" @node-click="handleNodeClick"></el-tree>
+          </el-popover>
         </el-form-item>
-        <el-form-item label="路由" required="true">
+        <el-form-item label="路由">
           <el-input v-model="editMenuFormInline.url" placeholder="路由"></el-input>
         </el-form-item>
-        <el-form-item label="排序" required="true">
-          <el-input-number v-model="editMenuFormInline.sort" @change="handleChange" :min="1" :max="10" label="排序"></el-input-number>
+        <el-form-item label="排序">
+          <el-input-number v-model="editMenuFormInline.orderNum" @change="handleChange" :min="0" :max="10" label="排序"></el-input-number>
         </el-form-item>
-        <el-form-item label="图标" required="true">
+        <el-form-item label="图标">
           <el-input v-model="editMenuFormInline.icon" placeholder="图标"></el-input>
         </el-form-item>
-        <el-form-item label="授权资源" required="true">
-          <el-input v-model="editMenuFormInline.perms" placeholder="授权资源"></el-input>
+        <el-form-item label="授权标识">
+          <el-input v-model="editMenuFormInline.perms" placeholder="授权标识"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="editVisible = false">关 闭</el-button>
-        <el-button type="primary" @click="submitEditMenuForm">提交</el-button>
+        <el-button type="primary" @click="submitEditMenuForm(currentEditStatus === 'add'?'post':'put')">提交</el-button>
       </div>
     </el-dialog>
   </el-row>
@@ -152,28 +172,39 @@ export default {
     return {
       title: '菜单管理',
       editVisible: false,
-      currentMessage: '',
+      currentEditStatus: 'add',
+      tableDataProtoType: [],
       tableData: [],
       formInline: {},
       editMenuFormInline: {
-        status: '',
+        type: 1,
         name: '',
-        pid: '',
+        parentId: 0,
+        parentName: '一级目录',
         url: '',
-        sort: '',
+        orderNum: '',
         icon: '',
         perms: ''
       },
-      expandedMenuIdArr: []
+      editMenuRules: {
+        name: [
+          { required: true, message: '用户名不能为空', trigger: 'blur' }
+        ],
+        parentName: [
+          { required: true, message: '上级部门不能为空', trigger: 'blur' }
+        ],
+        parentId: [
+          { required: true, message: '上级部门不能为空', trigger: 'blur' }
+        ]
+      },
+      radioDisabled: false,
+      expandedIdArr: []
     }
   },
   methods: {
     init () {
       let _this = this
       _this.search()
-    },
-    editMenuRules () {
-      console.log('haha')
     },
     expandHandler (row, currentBoolean) {
       let _this = this
@@ -189,9 +220,9 @@ export default {
           }
         }
       } else {
-        _this.expandedMenuIdArr = []
+        _this.expandedIdArr = []
         _this.digui2(row.menuId)
-        _this.tableData.splice(idx + 1, _this.expandedMenuIdArr.length)
+        _this.tableData.splice(idx + 1, _this.expandedIdArr.length)
         _this.digui(row)
         // console.log(_this.tableData)
       }
@@ -200,13 +231,33 @@ export default {
     handleChange () {
       console.log('排序')
     },
-    submitEditMenuForm () {
-      console.log('提交')
-    },
-    request (formInline) {
+    submitEditMenuForm (condition) {
       let _this = this
-      this.$http.get('/api/menulist'
-        // '/api/admin/sys/menu/list'
+      _this.$http({
+        method: condition,
+        url: '/api/admin/sys/menu',
+        data: _this.editMenuFormInline
+      }).then(function (response) {
+        if (response.data.code !== null && response.data.code !== undefined) {
+          if (response.data.code !== 0) {
+            _this.$message({
+              message: response.data.msg,
+              type: response.data.code === 0 ? 'success' : 'error',
+              duration: 2000
+            })
+          } else {
+            _this.editVisible = false
+            // _this.resetForm('editRoleFormInline')
+            _this.search()
+          }
+        }
+      }).catch(function () {})
+    },
+    request () {
+      let _this = this
+      this.$http.get(
+        // '/api/menulist'
+        '/api/admin/sys/menu/list'
       )
         .then(function (response) {
           if (response.data.code !== null && response.data.code !== undefined) {
@@ -219,6 +270,9 @@ export default {
             } else {
               _this.digui(response.data.data)
               _this.tableData = response.data.data
+              for (let key in response.data.data) {
+                _this.tableDataProtoType[key] = response.data.data[key]
+              }
             }
           }
         })
@@ -228,57 +282,89 @@ export default {
       let _this = this
       if (arr instanceof Array) {
         for (let i = 0; i < arr.length; i++) {
+          arr[i].label = arr[i].name
           arr[i].expand = false
           arr[i].textIndent = 0
           _this.digui(arr[i])
         }
       }
       if (arr instanceof Object) {
-        // for (let i in arr) {
-        //   arr[i].textIndent = 10
-        // console.log(arr[i].textIndent)
-        // }
         _this.digui(arr.children)
       }
     },
-    digui2 (currentMenuId) {
+    digui2 (currentId) {
       let _this = this
       for (let i = 0; i < _this.tableData.length; i++) {
-        if (_this.tableData[i].parentId === currentMenuId) {
-          _this.expandedMenuIdArr.push(_this.tableData[i].menuId)
+        if (_this.tableData[i].parentId === currentId) {
+          _this.expandedIdArr.push(_this.tableData[i].menuId)
           if (_this.tableData[i].children.length > 0) {
             _this.digui2(_this.tableData[i].menuId)
           }
         }
       }
     },
-    showCurrentMessage (currentMessage) {
+    showEdit (row) {
       let _this = this
-      _this.currentMessage = currentMessage
-      _this.messageVisible = true
-    },
-    pageTo () {
-      let _this = this
-      _this.formInline.pageNum = _this.pageNum
-      _this.formInline.pageSize = _this.pageSize
-      _this.request(_this.formInline)
+      _this.resetForm()
+      _this.currentEditStatus = row.menuId ? 'edit' : 'add'
+      if (row.menuId) {
+        _this.editMenuFormInline.menuId = row.menuId
+        _this.editMenuFormInline.type = row.type
+        _this.editMenuFormInline.name = row.name
+        _this.editMenuFormInline.url = row.url
+        _this.editMenuFormInline.orderNum = row.orderNum
+        _this.editMenuFormInline.icon = row.icon
+        _this.editMenuFormInline.perms = row.perms
+        _this.radioDisabled = true
+        _this.$http({
+          method: 'get',
+          url: '/api/admin/sys/menu/' + row.menuId
+        }).then(function (response) {
+          if (response.data.code !== null && response.data.code !== undefined) {
+            if (response.data.code !== 0) {
+              _this.$message({
+                message: response.data.msg,
+                type: response.data.code === 0 ? 'success' : 'error',
+                duration: 2000
+              })
+            } else {
+              // _this.editRoleFormInline.menuIdList = response.data.data.menuIdList
+              console.log(response.data.data)
+            }
+          }
+        }).catch(function () {})
+      } else {
+        _this.radioDisabled = false
+      }
+      _this.editVisible = true
     },
     search () {
       let _this = this
-      _this.pageNum = 1
-      _this.formInline.pageNum = _this.pageNum
-      _this.formInline.pageSize = _this.pageSize
       _this.request(_this.formInline)
     },
-    handleSizeChange (val) {
+    handleNodeClick (data) {
       let _this = this
-      _this.pageSize = val
-      _this.search()
+      this.$refs['parentNamePopover'].doClose()
+      _this.editMenuFormInline.parentName = data.name
+      _this.editMenuFormInline.parentId = data.menuId
     },
-    handleCurrentChange (val) {
+    clearHandler () {
       let _this = this
-      _this.pageNum = val
-      _this.pageTo()
+      _this.editMenuFormInline.parentId = 0
+      _this.editMenuFormInline.parentName = '一级目录'
+    },
+    resetForm () {
+      let _this = this
+      _this.editMenuFormInline = {
+        type: 1,
+        name: '',
+        parentId: 0,
+        parentName: '一级目录',
+        url: '',
+        orderNum: '',
+        icon: '',
+        perms: ''
+      }
     }
   },
   mounted () {
@@ -290,7 +376,7 @@ export default {
 </script>
 
 <style scoped>
-  .el-table__row {
-    height: 35px;
-  }
+.el-menu {
+  margin: 5px;
+}
 </style>

@@ -34,13 +34,6 @@ const ApproveHistory = (resolve) => {
 const ApproveHistoryDetails = (resolve) => {
   require(['../components/approveHistory/approveHistory-details'], resolve)
 }
-const Workspace = (resolve) => {
-  require(['../components/workspace'], resolve)
-}
-const ManualApprove = (resolve) => {
-  require(['../components/manualApprove.vue'], resolve)
-}
-
 const PersonCreditApply = (resolve) => {
   require(['../components/personCreditApply'], resolve)
 }
@@ -140,14 +133,6 @@ export default new Router({
           path: '/home/approveHistory',
           name: 'approveHistory',
           component: ApproveHistory
-        }, {
-          path: '/home/workspace',
-          name: 'workspace',
-          component: Workspace
-        }, {
-          path: '/home/manualApprove',
-          name: 'manualApprove',
-          component: ManualApprove
         }, {
           path: '/home/personCreditApply',
           name: 'personCreditApply',

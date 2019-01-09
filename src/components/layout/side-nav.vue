@@ -1,11 +1,12 @@
 <template>
    <el-menu id="side-nav"
-           :default-active="$route.path"
-           class="el-menu-vertical-demo"
-           background-color="#545c64"
-           text-color="#fff"
-           active-text-color="#ffd04b"
-           v-bind:router="true">
+     :default-active="$route.path"
+     background-color="#545c64"
+     text-color="#fff"
+     active-text-color="#ffd04b"
+      :collapse="isCollapse"
+     v-bind:router="true">
+     <el-button type="text" @click = 'isCollapse = !isCollapse'>ahahah</el-button>
      <template v-for="(item, index) in testList">
        <el-submenu :index="index.toString()" :key="item.menuId">
          <template slot="title">
@@ -19,7 +20,7 @@
            </el-menu-item-group>
        </el-submenu>
      </template>
-     <el-submenu index="100">
+     <el-submenu index="10">
        <template slot="title">
          <i class="el-icon-location"></i>
          <span>权限管理</span>
@@ -30,7 +31,7 @@
          <el-menu-item index="/home/role">角色管理</el-menu-item>
        </el-menu-item-group>
      </el-submenu>
-     <el-submenu index="200">
+     <el-submenu index="11">
        <template slot="title">
          <i class="el-icon-location"></i>
          <span>日志查看</span>
@@ -40,7 +41,7 @@
          <el-menu-item index="/home/operationLog">操作日志</el-menu-item>
        </el-menu-item-group>
      </el-submenu>
-     <el-submenu index="300">
+     <el-submenu index="13">
        <template slot="title">
          <i class="el-icon-location"></i>
          <span>系统管理</span>
@@ -57,6 +58,7 @@ export default {
   name: 'side-nav',
   data () {
     return {
+      isCollapse: false,
       menuList: {
         systemManage: [],
         business: [],
@@ -67,6 +69,11 @@ export default {
       },
       testList: []
     }
+  },
+  computed: {
+    // isCollapse () {
+    //   return this.$store.state.navCollapse
+    // }
   },
   methods: {
     init () {
@@ -136,7 +143,6 @@ export default {
 
 <style scoped>
   #side-nav{
-    width: 200px;
     background-color: #545c64;
     height: 100%;
   }

@@ -20,13 +20,13 @@
                 <span style="font-size: 1.2em">用户登录</span>
               </div>
               <el-form class="loginForm" ref="formInline" size="medium" @keyup.enter.native='onSubmit' :model="formInline" :rules="rules" >
-                <el-form-item prop="username">
+                <el-form-item prop="name">
                   <el-input placeholder="请输入用户名" v-model="formInline.name"></el-input>
                 </el-form-item>
                 <el-form-item prop="password">
                   <el-input type="password" placeholder="请输入密码" v-model="formInline.password"></el-input>
                 </el-form-item>
-                <el-form-item prop="code">
+                <el-form-item prop="captcha">
                   <el-row>
                     <el-col :span="14">
                       <el-input placeholder="请输入验证码" type="sms" v-model="formInline.captcha"></el-input>
@@ -133,7 +133,7 @@ export default {
                 // } else if (sessionStorage.getItem('roleName') === 'ROLE_burisker') {
                 //   _this.$router.push('/home/workspace')
                 // }
-                _this.$router.push('/home/menu')
+                _this.$router.push('/home')
               } else if (response.data.code === 500) {
                 _this.$message({
                   message: response.data.msg,

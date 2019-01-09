@@ -4,12 +4,12 @@
         <header-container></header-container>
       </el-header>
       <el-container style="height: 100%">
-        <el-aside width="200px" style="overflow-x: hidden;">
+        <el-aside width="auto" style="overflow-x: hidden;background-color: #ECECEC">
           <side-nav></side-nav>
         </el-aside>
         <el-main style="background-color: #ECECEC;height: 100%">
           <keep-alive :exclude="[
-          'workspace', 'manualApprove', 'ExceptionLog', 'productEdit',
+          'department', 'manualApprove', 'ExceptionLog', 'productEdit',
           'user', 'userAdd', 'userEdit', 'merchant', 'SysAuditLog',
            'sysPara', 'sysParaEdit', 'sysJob', 'sysJobAdd', 'sysJobEdit', 'personCreditApply',
            'personCreditApplyDetails', 'approvalHistory',

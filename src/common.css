@@ -1,13 +1,19 @@
-html,body{
+html{
   font-size: 14px;
   font-family: "微软雅黑 Microsoft YaHei";
   color: #37364d;
   height: 100%;
-  width: 100%;
+  /*width: 100%;*/
   padding: 0;
   margin: 0;
   overflow: hidden;
   word-break: break-all
+}
+body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: auto;
 }
 html .el-card{
   color: #37364d;
@@ -20,4 +26,3 @@ html h3{
 .rowMargin{
   margin-bottom: 20px;
 }
-

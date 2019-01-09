@@ -12,9 +12,9 @@ import router from './router'
 import './common.css'
 import './assets/icon/iconfont.css'
 import {
-  Button, Menu, Form, FormItem, Input, Table, Row, Col, MenuItem, Submenu, MenuItemGroup, TableColumn,
-  Switch, Select, Option, Radio, Container, Header, Aside, Main, Footer, Pagination, Card, DatePicker, Dialog,
-  Message, Tag, TabPane, Tabs, Transfer, Alert, CheckboxGroup, Checkbox, Loading
+  Button, Menu, Form, FormItem, Input, InputNumber, Tree, Table, Row, Col, MenuItem, Submenu, MenuItemGroup, TableColumn, Popover,
+  Switch, Select, Option, Radio, RadioGroup, Container, Header, Aside, Main, Footer, Pagination, Card, DatePicker, Dialog,
+  Dropdown, DropdownMenu, DropdownItem, Message, Tag, TabPane, Tabs, Transfer, Alert, CheckboxGroup, Checkbox, Loading
 } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 // fade/zoom 等
@@ -61,13 +61,15 @@ Vue.prototype.$dateFormat = function (sTimeCount, eTimeCount) {
   return obj
 }
 const elComponents = [
-  Row, Col, Menu, MenuItem, Submenu, MenuItemGroup, Table, TableColumn,
-  FormItem, Switch, Select, Option, Radio, Button, Form, Input, Header,
-  Aside, Main, Footer, Container, Pagination, Card, DatePicker, Dialog,
+  Row, Col, Menu, MenuItem, Submenu, MenuItemGroup, InputNumber, Tree, Table, TableColumn, Popover,
+  FormItem, Switch, Select, Option, Radio, RadioGroup, Button, Form, Input, Header,
+  Aside, Main, Footer, Container, Pagination, Card, DatePicker, Dialog, Dropdown, DropdownMenu, DropdownItem,
   Message, Tag, TabPane, Tabs, Transfer, Alert, CheckboxGroup, Checkbox]
 const store = new Vuex.Store({
   state: {
-    LoadingConfig: false
+    LoadingConfig: false,
+    navCollapse: false,
+    refresh: false
   },
   mutations: {
     loading (state) {
@@ -79,6 +81,13 @@ const store = new Vuex.Store({
       state.LoadingConfig = false
       // console.log('loading状态改变为:' + state.LoadingConfig)
       // }, 1000)
+    },
+    navCollapse (state) {
+      state.navCollapse = !state.navCollapse
+    },
+    refresh (state) {
+      state.refresh = !state.refresh
+      state.refresh = !state.refresh
     }
   },
   actions: {
@@ -87,6 +96,12 @@ const store = new Vuex.Store({
     },
     noLoading: ({commit}) => {
       commit('noLoading')
+    },
+    navCollapse: ({commit}) => {
+      commit('navCollapse')
+    },
+    refresh: ({commit}) => {
+      commit('refresh')
     }
   }
 })
@@ -105,7 +120,7 @@ router.beforeEach((to, from, next) => {
 function isNull (obj) {
   for (let key in obj) {
     if (obj[key] === '' || obj[key] === null) {
-      obj[key] = '暂无'
+      obj[key] = ''
     }
     if (obj[key].constructor === Array || obj[key].constructor === Object) {
       isNull(obj[key])
